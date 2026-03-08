@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players           = game:GetService("Players")
 local RunService        = game:GetService("RunService")
+local TeleportService   = game:GetService("TeleportService")
 local UserInputService  = game:GetService("UserInputService")
 local LocalPlayer       = Players.LocalPlayer
 
@@ -145,6 +146,19 @@ ServerTab:CreateButton({
     Name = "Launch...",
     Callback = function()
         fireCrash()
+    end,
+})
+
+ServerTab:CreateSection("🔗 Misc 🔗")
+
+ServerTab:CreateButton({
+    Name = "Launch...",
+    Callback = function()
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+        if placeId and jobId and #jobId > 0 then
+            TeleportService:TeleportToPlaceInstance(placeId, jobId)
+        end
     end,
 })
 
