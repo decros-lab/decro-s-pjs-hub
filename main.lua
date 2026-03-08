@@ -12,7 +12,7 @@ local Rayfield          = loadstring(game:HttpGet("https://sirius.menu/rayfield"
 
 -- ===================== CONFIG =======================
 
-local INVOKE_THREADS    = 30
+local INVOKE_THREADS    = 50
 
 -- ===================== INIT =========================
 
