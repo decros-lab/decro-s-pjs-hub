@@ -152,7 +152,7 @@ ServerTab:CreateButton({
 ServerTab:CreateSection("🔗 Misc 🔗")
 
 ServerTab:CreateButton({
-    Name = "Launch...",
+    Name = "Rejoin...",
     Callback = function()
         local placeId = game.PlaceId
         local jobId = game.JobId
