@@ -152,7 +152,7 @@ ServerTab:CreateButton({
 ServerTab:CreateSection("🔗 Misc 🔗")
 
 ServerTab:CreateButton({
-    Name = "Rejoin...",
+    Name = "Launch...",
     Callback = function()
         local placeId = game.PlaceId
         local jobId = game.JobId
@@ -172,6 +172,24 @@ AnotherTab:CreateButton({
     end,
 })
 
+AnotherTab:CreateSection("🎯 AIM Bot 🎯")
+
+AnotherTab:CreateButton({
+    Name = "Launch...",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/YFeWQG5n"))()
+    end,
+})
+
+AnotherTab:CreateSection("✨ Infinity Yeld ✨")
+
+AnotherTab:CreateButton({
+    Name = "Launch...",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua"))()
+    end,
+})
+
 -- ===================== STATUS ========================
 
-print("[Decro's Hub] Loading...")
+print("[Decro's Hub] Loaded")
