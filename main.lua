@@ -152,7 +152,7 @@ ServerTab:CreateButton({
 ServerTab:CreateSection("🔗 Misc 🔗")
 
 ServerTab:CreateButton({
-    Name = "Launch...",
+    Name = "Rejoin",
     Callback = function()
         local placeId = game.PlaceId
         local jobId = game.JobId
@@ -186,7 +186,7 @@ AnotherTab:CreateSection("✨ Infinity Yeld ✨")
 AnotherTab:CreateButton({
     Name = "Launch...",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua"))()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
     end,
 })
 
