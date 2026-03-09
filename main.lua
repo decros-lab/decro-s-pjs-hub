@@ -186,7 +186,7 @@ AnotherTab:CreateSection("✨ Infinity Yeld ✨")
 AnotherTab:CreateButton({
     Name = "Launch...",
     Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
     end,
 })
 
