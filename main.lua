@@ -131,8 +131,8 @@ end
 
 local Window = Rayfield:CreateWindow({
     Name = "Project Slayers Decro's Hub",
-    LoadingTitle = "Loading...    💚",
-    LoadingSubtitle = "💵 Limited Edition 💵",
+    LoadingTitle = "Loading...",
+    LoadingSubtitle = "Limited Edition ",
     Theme = "Ocean",
     ConfigurationSaving = {
         Enabled = false,
@@ -140,16 +140,34 @@ local Window = Rayfield:CreateWindow({
 })
 
 local ServerTab = Window:CreateTab("Server", 4483362458)
-ServerTab:CreateSection("🐉 Server Lag 🐉")
+ServerTab:CreateSection("Server Crash ")
 
 ServerTab:CreateButton({
-    Name = "Launch...",
+    Name = "SERVER LAG: Launch...",
     Callback = function()
         fireCrash()
     end,
 })
 
-ServerTab:CreateSection("📗 Misc 📗")
+ServerTab:CreateButton({
+    Name = "SERVER KILL: Launch...",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer("skil_ting_asd",game:GetService("Players").LocalPlayer,"thunderbreathingricespirit",5)
+local args = {
+    [1] = "ricespiritdamage",
+    [2] = game.Players.LocalPlayer.Character,
+    [3] = CFrame.new(-362.2265930175781, 425.482421875, -2354.545166015625, 0.32892149686813354, 0.024535520002245903, 0.9440385103225708, 1.0956046736509961e-07, 0.999662458896637, -0.025981221348047256, -0.9443572759628296, 0.008545885793864727, 0.328810453414917),
+    [4] = 99999999999999999999999
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S"):FireServer(unpack(args))
+
+task.wait(1.5)
+    module:Teleport(game.PlaceId)
+    end,
+})
+
+ServerTab:CreateSection("Misc ")
 
 ServerTab:CreateButton({
     Name = "Rejoin",
@@ -163,7 +181,7 @@ ServerTab:CreateButton({
 })
 
 local AnotherTab = Window:CreateTab("Another", 4483362458)
-AnotherTab:CreateSection("❄️ Frosties ❄️")
+AnotherTab:CreateSection("Frosties ")
 
 AnotherTab:CreateButton({
     Name = "Launch...",
@@ -172,7 +190,7 @@ AnotherTab:CreateButton({
     end,
 })
 
-AnotherTab:CreateSection("🌳 AIM Bot 🌳")
+AnotherTab:CreateSection("AIM Bot ")
 
 AnotherTab:CreateButton({
     Name = "Launch...",
@@ -181,7 +199,7 @@ AnotherTab:CreateButton({
     end,
 })
 
-AnotherTab:CreateSection("🟢 Infinity Yeld 🟢")
+AnotherTab:CreateSection("Infinity Yeld")
 
 AnotherTab:CreateButton({
     Name = "Launch...",
@@ -190,7 +208,7 @@ AnotherTab:CreateButton({
     end,
 })
 
-AnotherTab:CreateSection("🟩 Auto-Block 🟩")
+AnotherTab:CreateSection("Auto-Block")
 
 AnotherTab:CreateButton({
     Name = "Launch...",
@@ -471,4 +489,39 @@ print([[
 
 -- ===================== STATUS ========================
 
-print(" \nDECRO\nDECRO\nDECRO")
+print([[
+.----.
+|     \
+| |\   |
+| | |  |
+| |/   |
+|_____/
+
+.-----.
+|  ___|
+| |__
+|  __|
+| |___
+|_____|
+
+.----.
+/  ___|
+| |
+| |
+| |___
+\_____|
+
+.----.
+|  _ \
+| |_) |
+|  _ <
+| | \ \
+|_|  \_\
+
+.----.
+/  __  \
+| |  | |
+| |  | |
+| |__| |
+\______/
+]])
