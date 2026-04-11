@@ -121,7 +121,7 @@ local function fireCrash()
     if isActive then return end
     isActive = true
 
-    print(">>> LANTERN ATTACK <<<")
+    print("LANTERN ATTACK")
     invokeFlood()
     lanternCycle()
     changeValueFlood()
@@ -131,16 +131,16 @@ end
 
 local Window = Rayfield:CreateWindow({
     Name = "Project Slayers Decro's Hub",
-    LoadingTitle = "Loading...    🗃️",
-    LoadingSubtitle = "💷 Limited Edition 💷",
-    Theme = "Amethyst",
+    LoadingTitle = "Loading...    💚",
+    LoadingSubtitle = "💵 Limited Edition 💵",
+    Theme = "Ocean",
     ConfigurationSaving = {
         Enabled = false,
     },
 })
 
 local ServerTab = Window:CreateTab("Server", 4483362458)
-ServerTab:CreateSection("🔦 Server Crash 🔦")
+ServerTab:CreateSection("🐉 Server Lag 🐉")
 
 ServerTab:CreateButton({
     Name = "Launch...",
@@ -149,7 +149,7 @@ ServerTab:CreateButton({
     end,
 })
 
-ServerTab:CreateSection("🔗 Misc 🔗")
+ServerTab:CreateSection("📗 Misc 📗")
 
 ServerTab:CreateButton({
     Name = "Rejoin",
@@ -172,7 +172,7 @@ AnotherTab:CreateButton({
     end,
 })
 
-AnotherTab:CreateSection("🎯 AIM Bot 🎯")
+AnotherTab:CreateSection("🌳 AIM Bot 🌳")
 
 AnotherTab:CreateButton({
     Name = "Launch...",
@@ -181,7 +181,7 @@ AnotherTab:CreateButton({
     end,
 })
 
-AnotherTab:CreateSection("✨ Infinity Yeld ✨")
+AnotherTab:CreateSection("🟢 Infinity Yeld 🟢")
 
 AnotherTab:CreateButton({
     Name = "Launch...",
@@ -190,6 +190,285 @@ AnotherTab:CreateButton({
     end,
 })
 
+AnotherTab:CreateSection("🟩 Auto-Block 🟩")
+
+AnotherTab:CreateButton({
+    Name = "Launch...",
+    Callback = function()
+        local vim = game:GetService("VirtualInputManager")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+local movesFolder = ReplicatedStorage:WaitForChild("Animations"):WaitForChild("Moves")
+local clientModulesFolder = player:WaitForChild("PlayerScripts"):WaitForChild("Client_Modules"):WaitForChild("Modules")
+local handleInitiateC = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("To_Client"):WaitForChild("Handle_Initiate_C")
+local skillAnimationIds = {}
+local skillAnimationNames = {}
+local startupModuleNames = {}
+
+local maxDistance = 32
+local handledTracks = {}
+local handledSignals = {}
+local isPressing = false
+
+local function normalizeAnimationId(animationId)
+    local value = tostring(animationId or "")
+    return value:match("%d+") or ""
+end
+
+local function cacheSkillAnimation(instance)
+    if not instance:IsA("Animation") then
+        return
+    end
+
+    local animationId = normalizeAnimationId(instance.AnimationId)
+    if animationId ~= "" then
+        skillAnimationIds[animationId] = true
+    end
+
+    local name = string.lower(instance.Name or "")
+    if name ~= "" then
+        skillAnimationNames[name] = true
+    end
+end
+
+local function cacheStartupModule(instance)
+    if not instance:IsA("ModuleScript") then
+        return
+    end
+
+    local name = string.lower(instance.Name or "")
+    if name:find("startup", 1, true) or name:match("start%d*$") then
+        startupModuleNames[name] = true
+    end
+end
+
+for _, instance in ipairs(movesFolder:GetDescendants()) do
+    cacheSkillAnimation(instance)
+end
+
+movesFolder.DescendantAdded:Connect(cacheSkillAnimation)
+
+for _, instance in ipairs(clientModulesFolder:GetDescendants()) do
+    cacheStartupModule(instance)
+end
+
+clientModulesFolder.DescendantAdded:Connect(cacheStartupModule)
+
+local function isCharacterModel(instance)
+    return instance
+        and instance:IsA("Model")
+        and instance:FindFirstChild("HumanoidRootPart")
+        and instance:FindFirstChildOfClass("Humanoid")
+end
+
+local function extractCharacter(value)
+    local valueType = typeof(value)
+
+    if valueType == "Instance" then
+        if isCharacterModel(value) then
+            return value
+        end
+
+        local model = value:FindFirstAncestorOfClass("Model")
+        if isCharacterModel(model) then
+            return model
+        end
+    elseif valueType == "table" then
+        local character = rawget(value, "Character") or rawget(value, "character")
+        if typeof(character) == "Instance" and isCharacterModel(character) then
+            return character
+        end
+
+        for _, nestedValue in pairs(value) do
+            local nestedCharacter = extractCharacter(nestedValue)
+            if nestedCharacter then
+                return nestedCharacter
+            end
+        end
+    end
+end
+
+local function isAbilityTrack(track)
+    local animation = track.Animation
+    if animation then
+        local animationId = normalizeAnimationId(animation.AnimationId)
+        if animationId ~= "" and skillAnimationIds[animationId] then
+            return true
+        end
+    end
+
+    local name = string.lower(track.Name or "")
+    return name ~= "" and skillAnimationNames[name] == true
+end
+
+local function getNearestEnemyCharacter(myRoot)
+    local nearestCharacter = nil
+    local nearestDistance = math.huge
+
+    for _, enemy in ipairs(Players:GetPlayers()) do
+        if enemy ~= player then
+            local enemyChar = enemy.Character
+            local enemyRoot = enemyChar and enemyChar:FindFirstChild("HumanoidRootPart")
+            local enemyHumanoid = enemyChar and enemyChar:FindFirstChildOfClass("Humanoid")
+            if enemyRoot and enemyHumanoid and enemyHumanoid.Health > 0 then
+                local distance = (myRoot.Position - enemyRoot.Position).Magnitude
+                if distance < nearestDistance then
+                    nearestDistance = distance
+                    nearestCharacter = enemyChar
+                end
+            end
+        end
+    end
+
+    return nearestCharacter, nearestDistance
+end
+
+local function press_F()
+    if isPressing then
+        return
+    end
+
+    isPressing = true
+    task.spawn(function()
+        pcall(function()
+            vim:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+            task.wait(0.6)
+            vim:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+        end)
+        isPressing = false
+    end)
+end
+
+local function cleanupHandledTracks()
+    for track in pairs(handledTracks) do
+        local isPlaying = false
+        pcall(function()
+            isPlaying = track.IsPlaying
+        end)
+        if not isPlaying then
+            handledTracks[track] = nil
+        end
+    end
+end
+
+local function cleanupHandledSignals()
+    local now = os.clock()
+    for key, timestamp in pairs(handledSignals) do
+        if now - timestamp > 2 then
+            handledSignals[key] = nil
+        end
+    end
+end
+
+local function tryBlockNearestCharacter(sourceCharacter, signalName)
+    if not sourceCharacter or sourceCharacter == player.Character then
+        return
+    end
+
+    local character = player.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local sourceRoot = sourceCharacter:FindFirstChild("HumanoidRootPart")
+    if not root or not sourceRoot then
+        return
+    end
+
+    local nearestCharacter, nearestDistance = getNearestEnemyCharacter(root)
+    if nearestCharacter ~= sourceCharacter or nearestDistance > maxDistance then
+        return
+    end
+
+    local signalKey = string.format("%s:%s", sourceCharacter:GetDebugId(), signalName)
+    if handledSignals[signalKey] then
+        return
+    end
+
+    handledSignals[signalKey] = os.clock()
+    press_F()
+end
+
+handleInitiateC.OnClientEvent:Connect(function(signalName, ...)
+    local name = string.lower(tostring(signalName or ""))
+    if not startupModuleNames[name] then
+        return
+    end
+
+    local sourceCharacter = nil
+    for index = 1, select("#", ...) do
+        sourceCharacter = extractCharacter(select(index, ...))
+        if sourceCharacter then
+            break
+        end
+    end
+
+    tryBlockNearestCharacter(sourceCharacter, name)
+end)
+
+task.spawn(function()
+    while true do
+        pcall(function()
+            cleanupHandledTracks()
+            cleanupHandledSignals()
+            local character = player.Character
+            local root = character and character:FindFirstChild("HumanoidRootPart")
+            if not root then
+                return
+            end
+
+            local nearestCharacter, nearestDistance = getNearestEnemyCharacter(root)
+            if not nearestCharacter or nearestDistance > maxDistance then
+                return
+            end
+
+            local nearestHumanoid = nearestCharacter:FindFirstChildOfClass("Humanoid")
+            if not nearestHumanoid then
+                return
+            end
+
+            for _, track in ipairs(nearestHumanoid:GetPlayingAnimationTracks()) do
+                if isAbilityTrack(track) and not handledTracks[track] then
+                    handledTracks[track] = true
+                    press_F()
+                    break
+                end
+            end
+        end)
+        task.wait(0.015)
+    end
+end)
+
+print([[ 
+       /\
+      /  \\
+     / || \\
+    ^  ||  ^
+   _[]_ || _[]_
+   \TT| || |TT/
+    ~\|/==\|/~
+      | [] |
+   /\ | II | /\\
+  /  \| II |/  \\
+  |~| /I.II\ |~|
+ _/T|/_______\|T\_
+ \_           _/
+ | TTTTT | /===\\ | T |
+ /~~~~~~~\      /~~~~~~~\\
+/########################\\
+|##########################|
+|##########################|
+|##########################|
+ \########################/
+  \######################/
+   \####################/
+  /######################\\
+ /########################\\
+/##########################\\
+]])
+        print("Autoblock = Loaded")
+    end,
+})
+
 -- ===================== STATUS ========================
 
-print("[Decro's Hub] Loaded")
+print(" \nDECRO\nDECRO\nDECRO")
