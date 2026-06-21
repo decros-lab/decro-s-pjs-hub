@@ -1,4 +1,4 @@
-print("[===================================== ( The loading was successful. The script is running. ) =====================================]")
+print("[========= ( The loading was successful. The script is running. ) =========]")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players           = game:GetService("Players")
 local RunService        = game:GetService("RunService")
@@ -13,6 +13,7 @@ local INVOKE_THREADS    = 50
 local speedMultiplier = 1
 local currentTrueSpeed = 16.80
 local isModifyingSpeed = false
+local noSunDamageEnabled = false
 
 local function setupSpeedHook(character)
     local humanoid = character:WaitForChild("Humanoid", 5)
@@ -29,9 +30,26 @@ local function setupSpeedHook(character)
     end)
 end
 
+task.spawn(function()
+    while true do
+        if noSunDamageEnabled then
+            local pValues = ReplicatedStorage:FindFirstChild("PlayerValues")
+            local myValues = pValues and pValues:FindFirstChild(LocalPlayer.Name)
+            if myValues and not myValues:FindFirstChild("No_Sun_Damage") then
+                local boolVal = Instance.new("BoolValue")
+                boolVal.Name = "No_Sun_Damage"
+                boolVal.Value = true
+                boolVal.Parent = myValues
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
 if LocalPlayer.Character then
     task.spawn(setupSpeedHook, LocalPlayer.Character)
 end
+
 LocalPlayer.CharacterAdded:Connect(function(char)
     currentTrueSpeed = 16.80
     setupSpeedHook(char)
@@ -228,6 +246,23 @@ LocalTab:CreateButton({
             isModifyingSpeed = true
             humanoid.WalkSpeed = currentTrueSpeed
             isModifyingSpeed = false
+        end
+    end,
+})
+
+LocalTab:CreateToggle({
+    Name = "No Sun Damage",
+    CurrentValue = false,
+    Flag = "NoSunDamageToggle",
+    Callback = function(Value)
+        noSunDamageEnabled = Value
+        if not Value then
+            local pValues = ReplicatedStorage:FindFirstChild("PlayerValues")
+            local myValues = pValues and pValues:FindFirstChild(LocalPlayer.Name)
+            local target = myValues and myValues:FindFirstChild("No_Sun_Damage")
+            if target then
+                target:Destroy()
+            end
         end
     end,
 })
@@ -498,7 +533,7 @@ AnotherTab:CreateButton({
                 task.wait(0.010)
             end
         end)
-        print("[===================================== ( Autoblock=? Loaded. ) =====================================]")
+        print("[========= ( Autoblock=? Loaded. ) =========]")
     end,
 })
-print("[===================================== ( The launch is successful. Deсro conveys a pleasant game! ) =====================================]")
+print("[========= ( The launch is successful. Deсro conveys a pleasant game! ) =========]")
