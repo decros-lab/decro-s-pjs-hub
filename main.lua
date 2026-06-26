@@ -15,6 +15,30 @@ local currentTrueSpeed = 16.80
 local isModifyingSpeed = false
 local noSunDamageEnabled = false
 
+local scytheLowCD = false
+local swampLowCD = false
+local willLowCD = false
+
+local originalCooldowns = {}
+
+local scytheSkills = {
+    ["Asteroid"] = true,
+    ["Bloodlust"] = true
+}
+
+local swampSkills = {
+    ["Swamp Puddle"] = true,
+    ["Traveling Claws"] = true,
+    ["Swamp Eject"] = true,
+    ["Swamp Trap"] = true,
+    ["Self Replication"] = true,
+    ["Swamp Domain"] = true
+}
+
+local willSkills = {
+    ["Indomitable Will"] = true
+}
+
 local function setupSpeedHook(character)
     local humanoid = character:WaitForChild("Humanoid", 5)
     if not humanoid then return end
@@ -43,6 +67,74 @@ task.spawn(function()
             end
         end
         task.wait(0.5)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        pcall(function()
+            local powerAdder = LocalPlayer.PlayerGui:FindFirstChild("Power_Adder")
+            if powerAdder then
+                for _, desc in ipairs(powerAdder:GetDescendants()) do
+                    if desc.Name == "CoolDown" and desc:IsA("ValueBase") then
+                        local skillName = desc.Parent.Name
+                        if scytheSkills[skillName] then
+                            if scytheLowCD then
+                                if not originalCooldowns[desc] then
+                                    originalCooldowns[desc] = desc.Value
+                                end
+                                local targetVal = originalCooldowns[desc] * 0.5
+                                if desc.Value ~= targetVal then
+                                    desc.Value = targetVal
+                                end
+                            else
+                                if originalCooldowns[desc] then
+                                    if desc.Value ~= originalCooldowns[desc] then
+                                        desc.Value = originalCooldowns[desc]
+                                    end
+                                    originalCooldowns[desc] = nil
+                                end
+                            end
+                        elseif swampSkills[skillName] then
+                            if swampLowCD then
+                                if not originalCooldowns[desc] then
+                                    originalCooldowns[desc] = desc.Value
+                                end
+                                local targetVal = originalCooldowns[desc] * 0.5
+                                if desc.Value ~= targetVal then
+                                    desc.Value = targetVal
+                                end
+                            else
+                                if originalCooldowns[desc] then
+                                    if desc.Value ~= originalCooldowns[desc] then
+                                        desc.Value = originalCooldowns[desc]
+                                    end
+                                    originalCooldowns[desc] = nil
+                                end
+                            end
+                        elseif willSkills[skillName] then
+                            if willLowCD then
+                                if not originalCooldowns[desc] then
+                                    originalCooldowns[desc] = desc.Value
+                                end
+                                local targetVal = originalCooldowns[desc] * 0.5
+                                if desc.Value ~= targetVal then
+                                    desc.Value = targetVal
+                                end
+                            else
+                                if originalCooldowns[desc] then
+                                    if desc.Value ~= originalCooldowns[desc] then
+                                        desc.Value = originalCooldowns[desc]
+                                    end
+                                    originalCooldowns[desc] = nil
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+        task.wait(0.3)
     end
 end)
 
@@ -264,6 +356,35 @@ LocalTab:CreateToggle({
                 target:Destroy()
             end
         end
+    end,
+})
+
+LocalTab:CreateSection("Cooldown")
+
+LocalTab:CreateToggle({
+    Name = "Scythe low cooldown",
+    CurrentValue = false,
+    Flag = "ScytheCDToggle",
+    Callback = function(Value)
+        scytheLowCD = Value
+    end,
+})
+
+LocalTab:CreateToggle({
+    Name = "Swamp low cooldown",
+    CurrentValue = false,
+    Flag = "SwampCDToggle",
+    Callback = function(Value)
+        swampLowCD = Value
+    end,
+})
+
+LocalTab:CreateToggle({
+    Name = "Clan will low cooldown",
+    CurrentValue = false,
+    Flag = "ClanWillCDToggle",
+    Callback = function(Value)
+        willLowCD = Value
     end,
 })
 
