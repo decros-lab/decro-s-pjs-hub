@@ -5,7 +5,7 @@ local RunService=game:GetService("RunService")
 local TeleportService=game:GetService("TeleportService")
 local UserInputService=game:GetService("UserInputService")
 local LocalPlayer=Players.LocalPlayer
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Rayfield=loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local INVOKE_THREADS=50
 local speedMultiplier=1
 local currentTrueSpeed=16.80
@@ -209,14 +209,12 @@ local ServerTab=Window:CreateTab("Server",4483362458)
 ServerTab:CreateSection("Server damage")
 ServerTab:CreateButton({
 Name="Server lag",
-Info = "I advise you to hide as players will be able to see the lantern in your hand. It is worth getting as close to the players as possible, following 1 tip.",
 Callback=function()
 fireCrash()
 end,
 })
 ServerTab:CreateButton({
 Name="Server kill",
-Info = "It's not working at the moment.",
 Callback=function()
 game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S:FireServer("skil_ting_asd",game:GetService("Players").LocalPlayer,"thunderbreathingricespirit",5)
 local args={
