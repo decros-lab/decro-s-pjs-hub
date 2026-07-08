@@ -15,6 +15,7 @@ local scytheLowCD=false
 local swampLowCD=false
 local willLowCD=false
 local infinityStaminaEnabled=false
+local infinityStaminaThread=nil
 local originalCooldowns={}
 local scytheSkills={Asteroid=true,Bloodlust=true}
 local swampSkills={["Swamp Puddle"]=true,["Traveling Claws"]=true,["Swamp Eject"]=true,["Swamp Trap"]=true,["Self Replication"]=true,["Swamp Domain"]=true}
@@ -305,7 +306,24 @@ _G.Stamina=function(a,b) return true end
 _G.StamBreath=function(a,b,c) return true end
 _G.RemoveStam=function(a,b) end
 _G.AddStamina=function(a,b) end
+if not infinityStaminaThread then
+infinityStaminaThread=task.spawn(function()
+local player=Players.LocalPlayer
+local staminaObj=ReplicatedStorage:WaitForChild("PlayerValues"):WaitForChild(player.Name):WaitForChild("Stamina")
+while infinityStaminaEnabled do
+RunService.RenderStepped:Wait()
+if staminaObj and staminaObj.Value<staminaObj.MaxValue then
+staminaObj.Value=staminaObj.MaxValue
+end
+end
+end)
+end
 else
+infinityStaminaEnabled=false
+if infinityStaminaThread then
+task.cancel(infinityStaminaThread)
+infinityStaminaThread=nil
+end
 if origStamina then _G.Stamina=origStamina end
 if origStamBreath then _G.StamBreath=origStamBreath end
 if origRemoveStam then _G.RemoveStam=origRemoveStam end
