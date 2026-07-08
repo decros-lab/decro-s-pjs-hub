@@ -14,12 +14,16 @@ local noSunDamageEnabled=false
 local scytheLowCD=false
 local swampLowCD=false
 local willLowCD=false
+local warFanLowCD=false
+local iceLowCD=false
 local infinityStaminaEnabled=false
 local infinityStaminaThread=nil
 local originalCooldowns={}
 local scytheSkills={Asteroid=true,Bloodlust=true}
 local swampSkills={["Swamp Puddle"]=true,["Traveling Claws"]=true,["Swamp Eject"]=true,["Swamp Trap"]=true,["Self Replication"]=true,["Swamp Domain"]=true}
 local willSkills={["Indomitable Will"]=true}
+local warFanSkills={["War Tornado"]=true,["War Drums"]=true}
+local iceSkills={["Bodhisattva"]=true,["Lotus Vines"]=true,["Freezing Cloud"]=true,["Barren Hanging Garden"]=true,["Cold White Prince"]=true,["Wintry Icicles"]=true}
 local origStamina,origStamBreath,origRemoveStam,origAddStam=nil,nil,nil,nil
 local function setupSpeedHook(character)
 local humanoid=character:WaitForChild("Humanoid",5)
@@ -81,6 +85,28 @@ end
 end
 elseif willSkills[skillName] then
 if willLowCD then
+if not originalCooldowns[desc] then originalCooldowns[desc]=desc.Value end
+local targetVal=originalCooldowns[desc]*0.5
+if desc.Value~=targetVal then desc.Value=targetVal end
+else
+if originalCooldowns[desc] then
+if desc.Value~=originalCooldowns[desc] then desc.Value=originalCooldowns[desc] end
+originalCooldowns[desc]=nil
+end
+end
+elseif warFanSkills[skillName] then
+if warFanLowCD then
+if not originalCooldowns[desc] then originalCooldowns[desc]=desc.Value end
+local targetVal=originalCooldowns[desc]*0.5
+if desc.Value~=targetVal then desc.Value=targetVal end
+else
+if originalCooldowns[desc] then
+if desc.Value~=originalCooldowns[desc] then desc.Value=originalCooldowns[desc] end
+originalCooldowns[desc]=nil
+end
+end
+elseif iceSkills[skillName] then
+if iceLowCD then
 if not originalCooldowns[desc] then originalCooldowns[desc]=desc.Value end
 local targetVal=originalCooldowns[desc]*0.5
 if desc.Value~=targetVal then desc.Value=targetVal end
@@ -354,6 +380,22 @@ CurrentValue=false,
 Flag="ClanWillCDToggle",
 Callback=function(Value)
 willLowCD=Value
+end,
+})
+LocalTab:CreateToggle({
+Name="War fans low cooldown",
+CurrentValue=false,
+Flag="WarFanCDToggle",
+Callback=function(Value)
+warFanLowCD=Value
+end,
+})
+LocalTab:CreateToggle({
+Name="Ice low cooldown",
+CurrentValue=false,
+Flag="IceCDToggle",
+Callback=function(Value)
+iceLowCD=Value
 end,
 })
 local AnotherTab=Window:CreateTab("Another",4483362458)
