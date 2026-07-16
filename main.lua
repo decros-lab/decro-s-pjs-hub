@@ -187,15 +187,12 @@ local function fireCrash()
     changeValueFlood()
 end
 
--- ============================================================== --
--- =================== OPTIMIZED UI LIBRARY ===================== --
--- ============================================================== --
-
 local Library = {
     LogsEnabled = true,
     CurrentScale = 1,
     Connections = {},
     Instances = {},
+    Tweens = {},
     Settings = {Theme = {
         Background = Color3.fromRGB(12, 12, 12),
         Section = Color3.fromRGB(18, 18, 18),
@@ -221,7 +218,11 @@ local function Make(class, props, parent)
 end
 
 local function PlayTween(instance, goal)
+    if Library.Tweens[instance] then
+        Library.Tweens[instance]:Cancel()
+    end
     local tween = TweenService:Create(instance, DefaultTween, goal)
+    Library.Tweens[instance] = tween
     tween:Play()
     return tween
 end
@@ -275,12 +276,16 @@ function Library:Unload()
     for _, conn in ipairs(self.Connections) do
         conn:Disconnect()
     end
+    for _, tw in pairs(self.Tweens) do
+        tw:Cancel()
+    end
     for _, inst in ipairs(self.Instances) do
         if inst and inst.Parent then
             inst:Destroy()
         end
     end
     self.Connections = {}
+    self.Tweens = {}
     self.Instances = {}
 end
 
@@ -938,11 +943,6 @@ function Library:CreateSettingsPage(WindowObj)
     end})
 end
 
-
--- ============================================================== --
--- ===================== UI INITIALIZATION ====================== --
--- ============================================================== --
-
 local Window = Library:Window({Name="God's panel.",SubName="Made by decro",MenuKeybind=Enum.KeyCode.RightShift})
 
 local ServerTab = Window:Page({Name="Server"})
@@ -1051,5 +1051,4 @@ SecAnotherAB:Button({Name="Launch",Callback=function()
     task.spawn(function() while true do pcall(function() cleanupHandledTracks() cleanupHandledSignals() local character=player.Character local root=character and character:FindFirstChild("HumanoidRootPart") if not root then return end local nearestCharacter,nearestDistance=getNearestEnemyCharacter(root) if not nearestCharacter or nearestDistance>maxDistance then return end local nearestHumanoid=nearestCharacter:FindFirstChildOfClass("Humanoid") if not nearestHumanoid then return end for _,track in ipairs(nearestHumanoid:GetPlayingAnimationTracks()) do if isAbilityTrack(track) and not handledTracks[track] then handledTracks[track]=true press_F() break end end end) task.wait(0.010) end end)
 end})
 
--- Инициализация системной вкладки настроек
 Library:CreateSettingsPage(Window)
