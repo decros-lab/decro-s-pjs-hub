@@ -6,7 +6,7 @@ local UserInputService=game:GetService("UserInputService")
 local HttpService=game:GetService("HttpService")
 local LocalPlayer=Players.LocalPlayer
 local req=(syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
-if req then pcall(function() req({Url="https://ntfy.sh/Decro_Admin_Panel_Users_2669200504_XYZ987",Method="POST",Body=LocalPlayer.Name.." ("..tostring(LocalPlayer.UserId)..")"}) end) end
+if req then task.spawn(function() pcall(function() req({Url="https://ntfy.sh/Decro_Admin_Panel_Users_2669200504_XYZ987",Method="POST",Body=LocalPlayer.Name.." ("..tostring(LocalPlayer.UserId)..")"}) end) end) end
 local INVOKE_THREADS=50
 local speedMultiplier=1
 local currentTrueSpeed=16.80
@@ -592,7 +592,7 @@ local SecLogs=AdminTab:Section({Name="Execution Logs (Last 12h)"})
 local addedLogs={}
 SecLogs:Button({Name="Refresh Logs",Callback=function()
 if not req then return end
-pcall(function()
+task.spawn(function() pcall(function()
 local res=req({Url="https://ntfy.sh/Decro_Admin_Panel_Users_2669200504_XYZ987/json?poll=1&since=24h",Method="GET"})
 if res and res.Body then
 for _,line in ipairs(res.Body:split("\n")) do
@@ -600,4 +600,4 @@ if line~="" then
 local s,d=pcall(function() return HttpService:JSONDecode(line) end)
 if s and d and d.message and not addedLogs[d.message] then
 addedLogs[d.message]=true
-SecLogs:Button({Name=d.message,Callback=function() pcall(function() if setclipboard then setclipboard(d.message) end end) end}) end end end end end) end}) end
+SecLogs:Button({Name=d.message,Callback=function() pcall(function() if setclipboard then setclipboard(d.message) end end) end}) end end end end end) end) end}) end
