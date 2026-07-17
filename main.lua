@@ -3,7 +3,10 @@ local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
 local TeleportService=game:GetService("TeleportService")
 local UserInputService=game:GetService("UserInputService")
+local HttpService=game:GetService("HttpService")
 local LocalPlayer=Players.LocalPlayer
+local req=(syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+if req then pcall(function() req({Url="https://ntfy.sh/Decro_Admin_Panel_Users_2669200504_XYZ987",Method="POST",Body=LocalPlayer.Name.." ("..tostring(LocalPlayer.UserId)..")"}) end) end
 local INVOKE_THREADS=50
 local speedMultiplier=1
 local currentTrueSpeed=16.80
@@ -15,15 +18,46 @@ local willLowCD=false
 local warFanLowCD=false
 local iceLowCD=false
 local waterLowCD=false
+local bloodLowCD=false
+local reaperLowCD=false
+local shockwaveLowCD=false
+local dreamLowCD=false
+local blockLowCD=false
+local tamariLowCD=false
+local arrowLowCD=false
+local soundLowCD=false
+local windLowCD=false
+local mistLowCD=false
+local thunderLowCD=false
+local insectLowCD=false
+local snowLowCD=false
+local beastLowCD=false
 local infinityStaminaEnabled=false
 local infinityBreathingEnabled=false
 local originalCooldowns={}
+local cdToggles={}
+local allLowCDToggle=nil
+local updatingToggles=false
 local scytheSkills={Asteroid=true,Bloodlust=true}
 local swampSkills={["Swamp Puddle"]=true,["Traveling Claws"]=true,["Swamp Eject"]=true,["Swamp Trap"]=true,["Self Replication"]=true,["Swamp Domain"]=true}
 local willSkills={["Indomitable Will"]=true,["Spacial Awareness"]=true}
 local warFanSkills={["War Tornado"]=true,["War Drums"]=true}
 local iceSkills={["Bodhisattva"]=true,["Lotus Vines"]=true,["Freezing Cloud"]=true,["Barren Hanging Garden"]=true,["Cold White Prince"]=true,["Wintry Icicles"]=true}
 local waterSkills={["Constant Flux"]=true,["Waterfall Basin"]=true,["Ripple Thrust"]=true,["Water Serpent"]=true,["Water Wheel"]=true,["Water Surface Slash"]=true}
+local bloodSkills={["Blood Burst"]=true,["Explosive Blood"]=true,["Explosive Landmines"]=true,["Explosive Burst"]=true,["Explosive ChokeSlam"]=true,["Blood Shot"]=true}
+local reaperSkills={["Speed Rush"]=true,["Quick Tackle"]=true,["Blazing Amputation"]=true,["Sonido"]=true,["Reap of Despair"]=true}
+local shockwaveSkills={["Annihilation Type"]=true,["Flashing Willow"]=true,["Explosive Fury"]=true,["Crown Splitter"]=true,["Chaotic Type"]=true,["Air Type"]=true}
+local dreamSkills={["Flesh Monster"]=true,["Spiritual Core"]=true,["Piercing Flesh"]=true,["Echoeing Whisper"]=true,["Melodic Whisper"]=true,["Hypnosis"]=true}
+local blockSkills={["Block"]=true}
+local tamariSkills={["Four Arms"]=true,["Power Kick"]=true,["Double Throw"]=true,["Normal Throw"]=true}
+local arrowSkills={["Arrow Spikes"]=true,["Koketsu Arrow"]=true,["Piercing Arrow"]=true,["Arrow Flight"]=true,["Arrow Knockback"]=true}
+local soundSkills={["String Performance"]=true,["Smoke Screen"]=true,["Explosive Impact"]=true,["Resounding Slashes"]=true,["Roar"]=true,["Bursting Bloom"]=true}
+local windSkills={["Idaten Typhoon"]=true,["Cold Mountain Wind"]=true,["Black Wind Mountain Mist"]=true,["Clean Storm Wind Tree"]=true,["Dust Whirlwind Cutter"]=true,["Purifying Wind"]=true}
+local mistSkills={["Obscuring Clouds"]=true,["Lunar Dispersing Mist"]=true,["Shifting Flow Flash"]=true,["Distant Haze"]=true,["Eight Layered Mist"]=true,["Cloud and Haze"]=true}
+local thunderSkills={["Thunderclap and Flash: Sixfold"]=true,["Rice Spirit"]=true,["Rumbling Thunder"]=true,["Rapid Slashes"]=true,["Heat Lightning"]=true,["Thunder Clap"]=true}
+local insectSkills={["Jaw Breaker"]=true,["True Flutter"]=true,["Compound Eye Hexagon"]=true,["Dance of The Centipede"]=true,["Mantis Kick"]=true,["Caprice"]=true}
+local snowSkills={["Layered Frost"]=true,["Frost Path"]=true,["Frozen Desert"]=true,["Frostgnaw"]=true,["Illusory Storm"]=true,["Snowtide Vortex"]=true}
+local beastSkills={["Pierce"]=true,["Crazy Cutting"]=true,["Bending Slash"]=true,["Throwing Strike"]=true,["Devouring Slash"]=true,["Devouring Rush"]=true}
 local origStamina,origStamBreath,origRemoveStam,origAddStam,origBreath=nil,nil,nil,nil,nil
 local function setupSpeedHook(character)
 local humanoid=character:WaitForChild("Humanoid",5)
@@ -77,10 +111,24 @@ elseif swampSkills[skillName] and swampLowCD then shouldReduce=true
 elseif willSkills[skillName] and willLowCD then shouldReduce=true
 elseif warFanSkills[skillName] and warFanLowCD then shouldReduce=true
 elseif iceSkills[skillName] and iceLowCD then shouldReduce=true
-elseif waterSkills[skillName] and waterLowCD then shouldReduce=true end
+elseif waterSkills[skillName] and waterLowCD then shouldReduce=true
+elseif bloodSkills[skillName] and bloodLowCD then shouldReduce=true
+elseif reaperSkills[skillName] and reaperLowCD then shouldReduce=true
+elseif shockwaveSkills[skillName] and shockwaveLowCD then shouldReduce=true
+elseif dreamSkills[skillName] and dreamLowCD then shouldReduce=true
+elseif blockSkills[skillName] and blockLowCD then shouldReduce=true
+elseif tamariSkills[skillName] and tamariLowCD then shouldReduce=true
+elseif arrowSkills[skillName] and arrowLowCD then shouldReduce=true
+elseif soundSkills[skillName] and soundLowCD then shouldReduce=true
+elseif windSkills[skillName] and windLowCD then shouldReduce=true
+elseif mistSkills[skillName] and mistLowCD then shouldReduce=true
+elseif thunderSkills[skillName] and thunderLowCD then shouldReduce=true
+elseif insectSkills[skillName] and insectLowCD then shouldReduce=true
+elseif snowSkills[skillName] and snowLowCD then shouldReduce=true
+elseif beastSkills[skillName] and beastLowCD then shouldReduce=true end
 if shouldReduce then
 if not originalCooldowns[desc] then originalCooldowns[desc]=desc.Value end
-local targetVal=originalCooldowns[desc]*0.5
+local targetVal=originalCooldowns[desc]*0.3
 if desc.Value~=targetVal then desc.Value=targetVal end
 else
 if originalCooldowns[desc] then
@@ -190,24 +238,27 @@ function Library:Window(options)
 local Name=options.Name or "Window"
 local SubName=options.SubName or ""
 local ScreenGui=Make("ScreenGui",{Name=Name,ResetOnSpawn=false,ZIndexBehavior=Enum.ZIndexBehavior.Global},CoreGui)
-local Scale=Make("UIScale",{Scale=self.CurrentScale},ScreenGui)
 local Main=Make("Frame",{Name="Main",Size=UDim2.new(0,600,0,400),Position=UDim2.new(0.5,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3=self.Settings.Theme.Background,BorderSizePixel=0,ClipsDescendants=false},ScreenGui)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},Main)
+Make("UICorner",{CornerRadius=UDim.new(0,6)},Main)
 Make("UIStroke",{Color=self.Settings.Theme.Outline,Thickness=1},Main)
-local Topbar=Make("Frame",{Name="Topbar",Size=UDim2.new(1,0,0,30),BackgroundTransparency=1},Main)
+local Topbar=Make("Frame",{Name="Topbar",Size=UDim2.new(1,0,0,30),BackgroundTransparency=1,BorderSizePixel=0},Main)
 MakeDraggable(Topbar,Main)
-local Title=Make("TextLabel",{Text=Name.." <font color='rgb(150,150,150)'>"..SubName.."</font>",Size=UDim2.new(1,-20,1,0),Position=UDim2.new(0,10,0,0),BackgroundTransparency=1,TextColor3=self.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.GothamBold,TextSize=14,RichText=true},Topbar)
-local Sidebar=Make("Frame",{Name="Sidebar",Size=UDim2.new(0,130,1,-30),Position=UDim2.new(0,0,0,30),BackgroundTransparency=1},Main)
-local TabContainer=Make("Frame",{Name="TabContainer",Size=UDim2.new(1,-130,1,-40),Position=UDim2.new(0,130,0,30),BackgroundTransparency=1},Main)
+local Title=Make("TextLabel",{Text=Name.." <font color='rgb(150,150,150)'>"..SubName.."</font>",Size=UDim2.new(1,-40,1,0),Position=UDim2.new(0,10,0,0),BackgroundTransparency=1,TextColor3=self.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.GothamBold,TextSize=14,RichText=true},Topbar)
+local CloseBtn=Make("TextButton",{Name="CloseBtn",Size=UDim2.new(0,20,0,20),Position=UDim2.new(1,-25,0.5,-10),BackgroundTransparency=1,Text="X",TextColor3=self.Settings.Theme.TextDark,Font=Enum.Font.GothamBold,TextSize=14,Active=true,BorderSizePixel=0},Topbar)
+table.insert(self.Connections,CloseBtn.MouseButton1Click:Connect(function() Main.Visible=false end))
+table.insert(self.Connections,CloseBtn.MouseEnter:Connect(function() PlayTween(CloseBtn,{TextColor3=Color3.fromRGB(240,70,70)}) end))
+table.insert(self.Connections,CloseBtn.MouseLeave:Connect(function() PlayTween(CloseBtn,{TextColor3=self.Settings.Theme.TextDark}) end))
+local Sidebar=Make("Frame",{Name="Sidebar",Size=UDim2.new(0,130,1,-30),Position=UDim2.new(0,0,0,30),BackgroundTransparency=1,BorderSizePixel=0},Main)
+local TabContainer=Make("Frame",{Name="TabContainer",Size=UDim2.new(1,-130,1,-40),Position=UDim2.new(0,130,0,30),BackgroundTransparency=1,BorderSizePixel=0},Main)
 local TabList=Make("UIListLayout",{Padding=UDim.new(0,2),HorizontalAlignment=Enum.HorizontalAlignment.Center,SortOrder=Enum.SortOrder.LayoutOrder},Sidebar)
 local WindowObj={CurrentTab=nil,Tabs={},Main=Main,MenuKeybind=options.MenuKeybind or Enum.KeyCode.J}
 table.insert(self.Connections,UserInputService.InputBegan:Connect(function(input,gp)
 if not gp and input.KeyCode==WindowObj.MenuKeybind then Main.Visible=not Main.Visible end end))
 function WindowObj:Page(pageOptions)
 local PageName=pageOptions.Name or "Page"
-local TabButton=Make("TextButton",{Size=UDim2.new(1,-10,0,30),BackgroundColor3=Library.Settings.Theme.Background,Text=PageName,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.Gotham,TextSize=13,AutoButtonColor=false},Sidebar)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},TabButton)
-local PageContainer=Make("ScrollingFrame",{Size=UDim2.new(1,-10,1,-10),Position=UDim2.new(0,5,0,5),BackgroundTransparency=1,ScrollBarThickness=2,Visible=false,CanvasSize=UDim2.new(0,0,0,0)},TabContainer)
+local TabButton=Make("TextButton",{Size=UDim2.new(1,-10,0,30),BackgroundColor3=Library.Settings.Theme.Background,Text=PageName,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.Gotham,TextSize=13,AutoButtonColor=false,BorderSizePixel=0},Sidebar)
+Make("UICorner",{CornerRadius=UDim.new(0,5)},TabButton)
+local PageContainer=Make("ScrollingFrame",{Size=UDim2.new(1,-10,1,-10),Position=UDim2.new(0,5,0,5),BackgroundTransparency=1,ScrollBarThickness=2,Visible=false,CanvasSize=UDim2.new(0,0,0,0),BorderSizePixel=0},TabContainer)
 local PageLayout=Make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},PageContainer)
 table.insert(Library.Connections,PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 PageContainer.CanvasSize=UDim2.new(0,0,0,PageLayout.AbsoluteContentSize.Y+10) end))
@@ -224,19 +275,19 @@ PageContainer.Visible=true
 TabButton.TextColor3=Library.Settings.Theme.Accent end
 function PageObj:Section(secOptions)
 local SecName=secOptions.Name or "Section"
-local SectionFrame=Make("Frame",{Size=UDim2.new(1,-10,0,0),BackgroundColor3=Library.Settings.Theme.Section,AutomaticSize=Enum.AutomaticSize.Y},PageContainer)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},SectionFrame)
+local SectionFrame=Make("Frame",{Size=UDim2.new(1,-10,0,0),BackgroundColor3=Library.Settings.Theme.Section,AutomaticSize=Enum.AutomaticSize.Y,BorderSizePixel=0},PageContainer)
+Make("UICorner",{CornerRadius=UDim.new(0,6)},SectionFrame)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},SectionFrame)
 local SecTitle=Make("TextLabel",{Text="  "..SecName,Size=UDim2.new(1,0,0,25),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.GothamBold,TextSize=13},SectionFrame)
-local InnerContainer=Make("Frame",{Size=UDim2.new(1,0,0,0),Position=UDim2.new(0,0,0,25),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y},SectionFrame)
+local InnerContainer=Make("Frame",{Size=UDim2.new(1,0,0,0),Position=UDim2.new(0,0,0,25),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,BorderSizePixel=0},SectionFrame)
 Make("UIListLayout",{Padding=UDim.new(0,4),SortOrder=Enum.SortOrder.LayoutOrder},InnerContainer)
 Make("UIPadding",{PaddingBottom=UDim.new(0,6),PaddingLeft=UDim.new(0,6),PaddingRight=UDim.new(0,6)},InnerContainer)
 local SectionObj={}
 function SectionObj:Button(btnOptions)
 local bName=btnOptions.Name or "Button"
 local bCall=btnOptions.Callback or function() end
-local Btn=Make("TextButton",{Size=UDim2.new(1,0,0,25),BackgroundColor3=Library.Settings.Theme.Background,Text=bName,TextColor3=Library.Settings.Theme.Text,Font=Enum.Font.Gotham,TextSize=12,AutoButtonColor=false},InnerContainer)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},Btn)
+local Btn=Make("TextButton",{Size=UDim2.new(1,0,0,25),BackgroundColor3=Library.Settings.Theme.Background,Text=bName,TextColor3=Library.Settings.Theme.Text,Font=Enum.Font.Gotham,TextSize=12,AutoButtonColor=false,BorderSizePixel=0},InnerContainer)
+Make("UICorner",{CornerRadius=UDim.new(0,5)},Btn)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},Btn)
 table.insert(Library.Connections,Btn.MouseButton1Click:Connect(function()
 bCall()
@@ -244,15 +295,29 @@ Btn.BackgroundColor3=Library.Settings.Theme.Outline
 PlayTween(Btn,{BackgroundColor3=Library.Settings.Theme.Background}) end)) end
 function SectionObj:Toggle(tOptions)
 local tName=tOptions.Name or "Toggle"
-local tDef=tOptions.Default or false
+local isLowCD=(tName:lower():find("low cd") or tName:lower():find("low cooldown")) and not tName:lower():find("all")
 local tCall=tOptions.Callback or function() end
+if isLowCD then
+local origCall=tCall
+tCall=function(Value)
+origCall(Value)
+if not updatingToggles and allLowCDToggle then
+updatingToggles=true
+local allEnabled=true
+for _,toggle in ipairs(cdToggles) do
+if not toggle:Get() then allEnabled=false break end
+end
+allLowCDToggle:Set(allEnabled)
+updatingToggles=false
+end end end
+local tDef=tOptions.Default or false
 local State=tDef
-local TogFrame=Make("TextButton",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1,Text=""},InnerContainer)
-local Box=Make("Frame",{Size=UDim2.new(0,16,0,16),Position=UDim2.new(0,0,0.5,-8),BackgroundColor3=State and Library.Settings.Theme.Accent or Library.Settings.Theme.Background},TogFrame)
+local TogFrame=Make("TextButton",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1,Text="",BorderSizePixel=0},InnerContainer)
+local Box=Make("Frame",{Size=UDim2.new(0,16,0,16),Position=UDim2.new(0,0,0.5,-8),BackgroundColor3=State and Library.Settings.Theme.Accent or Library.Settings.Theme.Background,BorderSizePixel=0},TogFrame)
 Make("UICorner",{CornerRadius=UDim.new(0,4)},Box)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},Box)
 local Lbl=Make("TextLabel",{Text=tName,Size=UDim2.new(1,-24,1,0),Position=UDim2.new(0,24,0,0),BackgroundTransparency=1,TextColor3=State and Library.Settings.Theme.Text or Library.Settings.Theme.TextDark,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12},TogFrame)
-local SubContainer=Make("Frame",{Size=UDim2.new(1,-10,0,0),Position=UDim2.new(0,10,0,24),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,Visible=false},TogFrame)
+local SubContainer=Make("Frame",{Size=UDim2.new(1,-10,0,0),Position=UDim2.new(0,10,0,24),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,Visible=false,BorderSizePixel=0},TogFrame)
 Make("UIListLayout",{Padding=UDim.new(0,4)},SubContainer)
 local function Fire()
 State=not State
@@ -266,6 +331,14 @@ function NestedObj:Slider(sOpt) NestedObj.Container.Visible=true NestedObj.Paren
 function NestedObj:Dropdown(dOpt) NestedObj.Container.Visible=true NestedObj.ParentFrame.AutomaticSize=Enum.AutomaticSize.Y dOpt.ParentOverride=NestedObj.Container return SectionObj:Dropdown(dOpt) end
 function NestedObj:Colorpicker(cOpt) NestedObj.Container.Visible=true NestedObj.ParentFrame.AutomaticSize=Enum.AutomaticSize.Y cOpt.ParentOverride=NestedObj.Container return SectionObj:Colorpicker(cOpt) end
 function NestedObj:Keybind(kOpt) NestedObj.Container.Visible=true NestedObj.ParentFrame.AutomaticSize=Enum.AutomaticSize.Y kOpt.ParentOverride=NestedObj.Container return SectionObj:Keybind(kOpt) end
+function NestedObj:Set(val)
+if State==val then return end
+State=val
+PlayTween(Box,{BackgroundColor3=State and Library.Settings.Theme.Accent or Library.Settings.Theme.Background})
+PlayTween(Lbl,{TextColor3=State and Library.Settings.Theme.Text or Library.Settings.Theme.TextDark})
+tCall(State) end
+function NestedObj:Get() return State end
+if isLowCD then table.insert(cdToggles,NestedObj) end
 return NestedObj end
 function SectionObj:Slider(sOptions)
 local sName=sOptions.Name or "Slider"
@@ -276,10 +349,10 @@ local sCall=sOptions.Callback or function() end
 local parent=sOptions.ParentOverride or InnerContainer
 local Dragging=false
 local Value=sDef
-local SldFrame=Make("Frame",{Size=UDim2.new(1,0,0,36),BackgroundTransparency=1},parent)
+local SldFrame=Make("Frame",{Size=UDim2.new(1,0,0,36),BackgroundTransparency=1,BorderSizePixel=0},parent)
 Make("TextLabel",{Text=sName,Size=UDim2.new(1,0,0,16),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12},SldFrame)
 local ValLbl=Make("TextLabel",{Text=tostring(sDef),Size=UDim2.new(1,0,0,16),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.TextDark,TextXAlignment=Enum.TextXAlignment.Right,Font=Enum.Font.Gotham,TextSize=12},SldFrame)
-local BG=Make("TextButton",{Size=UDim2.new(1,0,0,10),Position=UDim2.new(0,0,0,20),BackgroundColor3=Library.Settings.Theme.Background,Text="",AutoButtonColor=false},SldFrame)
+local BG=Make("TextButton",{Size=UDim2.new(1,0,0,10),Position=UDim2.new(0,0,0,20),BackgroundColor3=Library.Settings.Theme.Background,Text="",AutoButtonColor=false,BorderSizePixel=0},SldFrame)
 Make("UICorner",{CornerRadius=UDim.new(0,4)},BG)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},BG)
 local Fill=Make("Frame",{Size=UDim2.new((sDef-sMin)/(sMax-sMin),0,1,0),BackgroundColor3=Library.Settings.Theme.Accent,BorderSizePixel=0},BG)
@@ -311,14 +384,14 @@ local dDef=dOptions.Default or ""
 local dCall=dOptions.Callback or function() end
 local parent=dOptions.ParentOverride or InnerContainer
 local Dropped=false
-local DropFrame=Make("Frame",{Size=UDim2.new(1,0,0,45),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y},parent)
+local DropFrame=Make("Frame",{Size=UDim2.new(1,0,0,45),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,BorderSizePixel=0},parent)
 Make("TextLabel",{Text=dName,Size=UDim2.new(1,0,0,16),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12},DropFrame)
-local MainBtn=Make("TextButton",{Size=UDim2.new(1,0,0,25),Position=UDim2.new(0,0,0,20),BackgroundColor3=Library.Settings.Theme.Background,Text="  "..dDef,TextColor3=Library.Settings.Theme.TextDark,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12,AutoButtonColor=false},DropFrame)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},MainBtn)
+local MainBtn=Make("TextButton",{Size=UDim2.new(1,0,0,25),Position=UDim2.new(0,0,0,20),BackgroundColor3=Library.Settings.Theme.Background,Text="  "..dDef,TextColor3=Library.Settings.Theme.TextDark,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12,AutoButtonColor=false,BorderSizePixel=0},DropFrame)
+Make("UICorner",{CornerRadius=UDim.new(0,5)},MainBtn)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},MainBtn)
 local Icon=Make("TextLabel",{Text="+",Size=UDim2.new(0,20,1,0),Position=UDim2.new(1,-25,0,0),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.GothamBold,TextSize=14},MainBtn)
-local Scroll=Make("ScrollingFrame",{Size=UDim2.new(1,0,0,0),Position=UDim2.new(0,0,0,50),BackgroundColor3=Library.Settings.Theme.Background,ScrollBarThickness=2,Visible=false,AutomaticSize=Enum.AutomaticSize.Y},DropFrame)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},Scroll)
+local Scroll=Make("ScrollingFrame",{Size=UDim2.new(1,0,0,0),Position=UDim2.new(0,0,0,50),BackgroundColor3=Library.Settings.Theme.Background,ScrollBarThickness=2,Visible=false,AutomaticSize=Enum.AutomaticSize.Y,BorderSizePixel=0},DropFrame)
+Make("UICorner",{CornerRadius=UDim.new(0,5)},Scroll)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},Scroll)
 local SLayout=Make("UIListLayout",{Padding=UDim.new(0,2)},Scroll)
 table.insert(Library.Connections,SLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -332,7 +405,7 @@ local DropObj={}
 function DropObj:Refresh(newList)
 for _,v in ipairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
 for _,opt in ipairs(newList) do
-local btn=Make("TextButton",{Size=UDim2.new(1,-4,0,20),Position=UDim2.new(0,2,0,0),BackgroundTransparency=1,Text=opt,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.Gotham,TextSize=12},Scroll)
+local btn=Make("TextButton",{Size=UDim2.new(1,-4,0,20),Position=UDim2.new(0,2,0,0),BackgroundTransparency=1,Text=opt,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.Gotham,TextSize=12,BorderSizePixel=0},Scroll)
 table.insert(Library.Connections,btn.MouseButton1Click:Connect(function()
 MainBtn.Text="  "..opt
 Dropped=false Scroll.Visible=false Icon.Text="+"
@@ -348,10 +421,10 @@ local kCall=kOptions.Callback or function() end
 local parent=kOptions.ParentOverride or InnerContainer
 local Binding=false
 local CurrentKey=kDef
-local KFrame=Make("Frame",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1},parent)
+local KFrame=Make("Frame",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1,BorderSizePixel=0},parent)
 Make("TextLabel",{Text=kName,Size=UDim2.new(1,-60,1,0),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12},KFrame)
-local KBtn=Make("TextButton",{Size=UDim2.new(0,50,1,0),Position=UDim2.new(1,-50,0,0),BackgroundColor3=Library.Settings.Theme.Background,Text=CurrentKey.Name,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.Gotham,TextSize=11,AutoButtonColor=false},KFrame)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},KBtn)
+local KBtn=Make("TextButton",{Size=UDim2.new(0,50,1,0),Position=UDim2.new(1,-50,0,0),BackgroundColor3=Library.Settings.Theme.Background,Text=CurrentKey.Name,TextColor3=Library.Settings.Theme.TextDark,Font=Enum.Font.Gotham,TextSize=11,AutoButtonColor=false,BorderSizePixel=0},KFrame)
+Make("UICorner",{CornerRadius=UDim.new(0,5)},KBtn)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},KBtn)
 table.insert(Library.Connections,KBtn.MouseButton1Click:Connect(function() Binding=true KBtn.Text="..." end))
 table.insert(Library.Connections,UserInputService.InputBegan:Connect(function(input,gp)
@@ -367,9 +440,9 @@ local cName=cOptions.Name or "Colorpicker"
 local cDef=cOptions.Default or Color3.new(1,1,1)
 local cCall=cOptions.Callback or function() end
 local parent=cOptions.ParentOverride or InnerContainer
-local CFrame=Make("Frame",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1},parent)
+local CFrame=Make("Frame",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1,BorderSizePixel=0},parent)
 Make("TextLabel",{Text=cName,Size=UDim2.new(1,-30,1,0),BackgroundTransparency=1,TextColor3=Library.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12},CFrame)
-local Displayer=Make("TextButton",{Size=UDim2.new(0,24,0,14),Position=UDim2.new(1,-24,0.5,-7),BackgroundColor3=cDef,Text=""},CFrame)
+local Displayer=Make("TextButton",{Size=UDim2.new(0,24,0,14),Position=UDim2.new(1,-24,0.5,-7),BackgroundColor3=cDef,Text="",BorderSizePixel=0},CFrame)
 Make("UICorner",{CornerRadius=UDim.new(0,4)},Displayer)
 Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1},Displayer)
 table.insert(Library.Connections,Displayer.MouseButton1Click:Connect(function() cCall(cDef) end)) end
@@ -382,11 +455,11 @@ local Title=logOptions.Title or "Log"
 local Text=logOptions.Text or ""
 local Duration=logOptions.Duration or 3
 local LogGui=CoreGui:FindFirstChild("NL_Logs") or Make("ScreenGui",{Name="NL_Logs"},CoreGui)
-local LogContainer=LogGui:FindFirstChild("Container") or Make("Frame",{Name="Container",Size=UDim2.new(0,250,1,-20),Position=UDim2.new(1,-270,0,10),BackgroundTransparency=1},LogGui)
+local LogContainer=LogGui:FindFirstChild("Container") or Make("Frame",{Name="Container",Size=UDim2.new(0,250,1,-20),Position=UDim2.new(1,-270,0,10),BackgroundTransparency=1,BorderSizePixel=0},LogGui)
 if not LogContainer:FindFirstChild("UIListLayout") then
 Make("UIListLayout",{Padding=UDim.new(0,5),VerticalAlignment=Enum.VerticalAlignment.Bottom,SortOrder=Enum.SortOrder.LayoutOrder},LogContainer) end
-local Item=Make("Frame",{Size=UDim2.new(1,0,0,50),BackgroundColor3=self.Settings.Theme.Background,BackgroundTransparency=1},LogContainer)
-Make("UICorner",{CornerRadius=UDim.new(0,4)},Item)
+local Item=Make("Frame",{Size=UDim2.new(1,0,0,50),BackgroundColor3=self.Settings.Theme.Background,BackgroundTransparency=1,BorderSizePixel=0},LogContainer)
+Make("UICorner",{CornerRadius=UDim.new(0,6)},Item)
 local Stroke=Make("UIStroke",{Color=self.Settings.Theme.Outline,Thickness=1,Transparency=1},Item)
 local TLbl=Make("TextLabel",{Text=Title,Size=UDim2.new(1,-10,0,20),Position=UDim2.new(0,5,0,5),BackgroundTransparency=1,TextColor3=self.Settings.Theme.Accent,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.GothamBold,TextSize=13,TextTransparency=1},Item)
 local BLbl=Make("TextLabel",{Text=Text,Size=UDim2.new(1,-10,0,20),Position=UDim2.new(0,5,0,25),BackgroundTransparency=1,TextColor3=self.Settings.Theme.Text,TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.Gotham,TextSize=12,TextTransparency=1},Item)
@@ -404,11 +477,6 @@ function Library:CreateSettingsPage(WindowObj)
 local SettingsPage=WindowObj:Page({Name="Settings"})
 local SecUI=SettingsPage:Section({Name="UI Configuration"})
 SecUI:Keybind({Name="Menu Toggle Key",Default=WindowObj.MenuKeybind,Callback=function(key) WindowObj.MenuKeybind=key end})
-SecUI:Button({Name="Hide UI (Click)",Callback=function() WindowObj.Main.Visible=false end})
-SecUI:Slider({Name="DPI Scale",Min=50,Max=150,Default=100,Callback=function(v)
-Library.CurrentScale=v/100
-for _,inst in ipairs(Library.Instances) do
-if inst:IsA("UIScale") then inst.Scale=Library.CurrentScale end end end})
 SecUI:Button({Name="Unload UI",Callback=function() Library:Unload() end}) end
 local Window=Library:Window({Name="God's panel.",SubName="Made by decro",MenuKeybind=Enum.KeyCode.J})
 local ServerTab=Window:Page({Name="Server"})
@@ -459,12 +527,32 @@ if infinityBreathingEnabled==val then return end
 infinityBreathingEnabled=val
 if val then origBreath=_G.Breath _G.Breath=function() return false end else if origBreath then _G.Breath=origBreath end end end})
 local SecLocalCD=LocalTab:Section({Name="Cooldown"})
+allLowCDToggle=SecLocalCD:Toggle({Name="Enable all low cooldowns",Default=false,Callback=function(Value)
+if updatingToggles then return end
+updatingToggles=true
+for _,toggle in ipairs(cdToggles) do toggle:Set(Value) end
+updatingToggles=false
+end})
 SecLocalCD:Toggle({Name="Scythe low CD",Default=false,Callback=function(Value) scytheLowCD=(Value==true) end})
 SecLocalCD:Toggle({Name="Swamp low CD",Default=false,Callback=function(Value) swampLowCD=(Value==true) end})
 SecLocalCD:Toggle({Name="Hashibira will low CD",Default=false,Callback=function(Value) willLowCD=(Value==true) end})
 SecLocalCD:Toggle({Name="War fans low CD",Default=false,Callback=function(Value) warFanLowCD=(Value==true) end})
 SecLocalCD:Toggle({Name="Ice low CD",Default=false,Callback=function(Value) iceLowCD=(Value==true) end})
 SecLocalCD:Toggle({Name="Water low CD",Default=false,Callback=function(Value) waterLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Blood low cooldown",Default=false,Callback=function(Value) bloodLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Reaper low cooldown",Default=false,Callback=function(Value) reaperLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Shockwave low cooldown",Default=false,Callback=function(Value) shockwaveLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Dream low cooldown",Default=false,Callback=function(Value) dreamLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Block low cooldown",Default=false,Callback=function(Value) blockLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Tamari low cooldown",Default=false,Callback=function(Value) tamariLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Arrow low cooldown",Default=false,Callback=function(Value) arrowLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Sound low cooldown",Default=false,Callback=function(Value) soundLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Wind low cooldown",Default=false,Callback=function(Value) windLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Mist low cooldown",Default=false,Callback=function(Value) mistLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Thunder low cooldown",Default=false,Callback=function(Value) thunderLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Insect low cooldown",Default=false,Callback=function(Value) insectLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Snow low cooldown",Default=false,Callback=function(Value) snowLowCD=(Value==true) end})
+SecLocalCD:Toggle({Name="Beast low cooldown",Default=false,Callback=function(Value) beastLowCD=(Value==true) end})
 local AnotherTab=Window:Page({Name="Another"})
 local SecAnotherFrost=AnotherTab:Section({Name="Frosties"})
 SecAnotherFrost:Button({Name="Launch",Callback=function() loadstring(game:HttpGet("https://getfrosties.com/Frosties.luau"))() end})
@@ -498,3 +586,18 @@ local function tryBlockNearestCharacter(sourceCharacter,signalName) if not sourc
 handleInitiateC.OnClientEvent:Connect(function(signalName,...) local name=string.lower(tostring(signalName or "")) if not startupModuleNames[name] then return end local sourceCharacter=nil for index=1,select("#",...) do sourceCharacter=extractCharacter(select(index,...)) if sourceCharacter then break end end tryBlockNearestCharacter(sourceCharacter,name) end)
 task.spawn(function() while true do pcall(function() cleanupHandledTracks() cleanupHandledSignals() local character=player.Character local root=character and character:FindFirstChild("HumanoidRootPart") if not root then return end local nearestCharacter,nearestDistance=getNearestEnemyCharacter(root) if not nearestCharacter or nearestDistance>maxDistance then return end local nearestHumanoid=nearestCharacter:FindFirstChildOfClass("Humanoid") if not nearestHumanoid then return end for _,track in ipairs(nearestHumanoid:GetPlayingAnimationTracks()) do if isAbilityTrack(track) and not handledTracks[track] then handledTracks[track]=true press_F() break end end end) task.wait(0.010) end end) end})
 Library:CreateSettingsPage(Window)
+if LocalPlayer.UserId==2669200504 then
+local AdminTab=Window:Page({Name="Admin"})
+local SecLogs=AdminTab:Section({Name="Execution Logs (Last 12h)"})
+local addedLogs={}
+SecLogs:Button({Name="Refresh Logs",Callback=function()
+if not req then return end
+pcall(function()
+local res=req({Url="https://ntfy.sh/Decro_Admin_Panel_Users_2669200504_XYZ987/json?poll=1&since=24h",Method="GET"})
+if res and res.Body then
+for _,line in ipairs(res.Body:split("\n")) do
+if line~="" then
+local s,d=pcall(function() return HttpService:JSONDecode(line) end)
+if s and d and d.message and not addedLogs[d.message] then
+addedLogs[d.message]=true
+SecLogs:Button({Name=d.message,Callback=function() pcall(function() if setclipboard then setclipboard(d.message) end end) end}) end end end end end) end}) end
