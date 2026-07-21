@@ -140,8 +140,7 @@ elseif flameSkills[skillName] and flameLowCD then shouldReduce=true
 elseif breathSkills[skillName] and breathLowCD then shouldReduce=true end
 if shouldReduce then
 if not originalCooldowns[desc] then originalCooldowns[desc]=desc.Value end
-local factor = 0.3
-if dreamSkills[skillName] and dreamLowCD then factor = 0.9 end
+local factor = 0.6
 local targetVal=originalCooldowns[desc]*factor
 if desc.Value~=targetVal then desc.Value=targetVal end
 else
@@ -314,7 +313,18 @@ table.insert(Library.Connections,Btn.MouseButton1Up:Connect(function() PlayTween
 table.insert(Library.Connections,Btn.MouseButton1Click:Connect(function()
 bCall()
 Btn.BackgroundColor3=Library.Settings.Theme.Outline
-PlayTween(Btn,{BackgroundColor3=hC}) end)) end
+PlayTween(Btn,{BackgroundColor3=hC}) end))
+local RetObj={}
+function RetObj:SetText(txt) Btn.Text=txt end
+return RetObj end
+function SectionObj:Label(lOptions)
+local lName=lOptions.Name or "Label"
+local LblBtn=Make("TextButton",{Size=UDim2.new(1,0,0,25),BackgroundColor3=Library.Settings.Theme.Background,Text=lName,TextColor3=Library.Settings.Theme.Text,Font=Enum.Font.Gotham,TextSize=12,AutoButtonColor=false,Active=false,BorderSizePixel=0},InnerContainer)
+Make("UICorner",{CornerRadius=UDim.new(0,5)},LblBtn)
+Make("UIStroke",{Color=Library.Settings.Theme.Outline,Thickness=1.2},LblBtn)
+local RetObj={}
+function RetObj:SetText(txt) LblBtn.Text=txt end
+return RetObj end
 function SectionObj:Toggle(tOptions)
 local tName=tOptions.Name or "Toggle"
 local isLowCD=(tName:lower():find("low cd") or tName:lower():find("low cooldown")) and not tName:lower():find("all")
@@ -554,7 +564,7 @@ speedMultiplier=1
 local character=LocalPlayer.Character
 local humanoid=character and character:FindFirstChildOfClass("Humanoid")
 if humanoid then isModifyingSpeed=true humanoid.WalkSpeed=currentTrueSpeed isModifyingSpeed=false end end})
-SecLocalChar:Button({Name="Spin BDA (Anywhere)",Callback=function()
+SecLocalChar:Button({Name="Spin BDA",Callback=function()
 pcall(function() game:GetService("ReplicatedStorage").Remotes.To_Server.Handle_Initiate_S_:InvokeServer("check_can_spin_demon_art") end)
 task.wait(0.1)
 pcall(function()
@@ -564,6 +574,16 @@ for _,child in ipairs(powerAdder:GetChildren()) do
 if child.Name:lower():find("_bda") then
 local remote=child:FindFirstChild("LocalScript") and child.LocalScript:FindFirstChild("RemoteEvent")
 if remote then remote:FireServer(true) end end end end end) end})
+local spinLabel=SecLocalChar:Label({Name="Spins: Loading..."})
+task.spawn(function()
+while not scriptUnloaded do
+pcall(function()
+local rs=game:GetService("ReplicatedStorage")
+local pd=rs:FindFirstChild("Player_Data") and rs.Player_Data:FindFirstChild(LocalPlayer.Name)
+local pv=rs:FindFirstChild("PlayerValues") and rs.PlayerValues:FindFirstChild(LocalPlayer.Name)
+local spinsVal=(pd and pd:FindFirstChild("Demon_art_Spins")) or (pv and pv:FindFirstChild("Demon_art_Spins"))
+if spinsVal then spinLabel:SetText("Spins: "..tostring(spinsVal.Value)) else spinLabel:SetText("Spins: 0") end end)
+task.wait(0.2) end end)
 SecLocalChar:Toggle({Name="No Sun Damage",Default=false,Callback=function(Value)
 noSunDamageEnabled=(Value==true)
 if not noSunDamageEnabled then
