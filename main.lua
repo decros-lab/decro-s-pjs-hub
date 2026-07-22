@@ -539,6 +539,26 @@ local placeId=game.PlaceId
 local jobId=game.JobId
 if placeId and jobId and #jobId>0 then TeleportService:TeleportToPlaceInstance(placeId,jobId) end end})
 SecServerMisc:Toggle({Name="Rejoin on kicks",Default=false,Callback=function(v) rejoinOnKickEnabled=v end})
+local SecServerOpt=ServerTab:Section({Name="Optimization"})
+SecServerOpt:Button({Name="Boost FPS",Callback=function()
+if _G.__PSOptimizerConns then for _,c in ipairs(_G.__PSOptimizerConns) do c:Disconnect() end end
+_G.__PSOptimizerConns={}
+local EFFECTS={ParticleEmitter=true,Trail=true,Beam=true,Fire=true,Smoke=true,Sparkles=true,Explosion=true,Highlight=true,PointLight=true,SurfaceLight=true,SpotLight=true,BlurEffect=true,ColorCorrectionEffect=true,DepthOfFieldEffect=true,SunRaysEffect=true,BloomEffect=true}
+local disabledCount=0
+local function processInst(inst)
+pcall(function()
+local cName=inst.ClassName
+if EFFECTS[cName] then inst.Enabled=false disabledCount=disabledCount+1
+elseif cName=="Decal" or cName=="Texture" then inst.Transparency=1 disabledCount=disabledCount+1 end end) end
+local function sweep(root) for _,desc in ipairs(root:GetDescendants()) do processInst(desc) end end
+local function watch(container) table.insert(_G.__PSOptimizerConns,container.DescendantAdded:Connect(function(desc) task.defer(processInst,desc) end)) end
+sweep(workspace) sweep(game:GetService("Lighting")) sweep(Players)
+local sky=game:GetService("Lighting"):FindFirstChildOfClass("Sky") if sky then sky:Destroy() end
+local clouds=game:GetService("Lighting"):FindFirstChildOfClass("Clouds") if clouds then clouds.Enabled=false end
+watch(workspace) watch(game:GetService("Lighting")) watch(Players)
+table.insert(_G.__PSOptimizerConns,Players.PlayerAdded:Connect(function(p) table.insert(_G.__PSOptimizerConns,p.CharacterAdded:Connect(function(c) sweep(c) end)) end))
+if LocalPlayer and LocalPlayer.Character then sweep(LocalPlayer.Character) end
+print(string.format("[Optimizer] Disabled %d instances.",disabledCount)) end})
 local SecServerKillAll=ServerTab:Section({Name="Kill all ( need arrow )"})
 getgenv().selectedPlayerName = ""
 getgenv().TargetPlayersArrow = false
