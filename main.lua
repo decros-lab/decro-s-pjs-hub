@@ -522,7 +522,7 @@ local SettingsPage=WindowObj:Page({Name="Settings"})
 local SecUI=SettingsPage:Section({Name="UI Configuration"})
 SecUI:Keybind({Name="Menu Toggle Key",Default=WindowObj.MenuKeybind,Callback=function(key) WindowObj.MenuKeybind=key end})
 SecUI:Button({Name="Close panel",Callback=function() isActive=false Library:Unload() end}) end
-local Window=Library:Window({Name="God's panel.",SubName="Made by zdecro ( caster )",MenuKeybind=Enum.KeyCode.J})
+local Window=Library:Window({Name="God's panel.",SubName="Made by zdecro ( seraphim )",MenuKeybind=Enum.KeyCode.J})
 local ServerTab=Window:Page({Name="Server"})
 local SecServerDmg=ServerTab:Section({Name="Server damage"})
 SecServerDmg:Button({Name="Server lag",Callback=function() fireCrash() end})
