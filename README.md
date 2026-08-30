@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > **This project is currently closed.**
 
-God's panel is a Roblox addon originally created to simplify certain parts of gameplay, provide additional quality-of-life features, and experiment with various game mechanics.
+God's panel is a PJS addon originally created to simplify certain parts of gameplay, provide additional quality-of-life features, and experiment with various game mechanics.
 
 The project was made primarily for personal use and development experience, but was later made publicly available.
 
