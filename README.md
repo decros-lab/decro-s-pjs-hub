@@ -1,7 +1,9 @@
 # God's panel xd
 ---
-> [!NOTE]
-> Current script: loadstring(game:HttpGet("https://raw.githubusercontent.com/morithedev/gods-panel/refs/heads/main/main.lua"))()
+# Current script:
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/morithedev/gods-panel/refs/heads/main/main.lua"))()
+```
 ---
 > [!IMPORTANT]
 > **This project is currently closed.**
